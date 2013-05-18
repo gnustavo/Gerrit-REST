@@ -1,0 +1,6 @@
+/Gerrit-REST-*
+/.build
+*.bak
+*.tar.gz
+*~
+/.tidyall.d/
