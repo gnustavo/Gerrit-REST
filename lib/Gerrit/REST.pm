@@ -40,8 +40,11 @@ sub new {
     # Request compact JSON by default
     $rest->addHeader('Accept' => 'application/json');
 
-    # Configure password authentication
-    $rest->getUseragent()->credentials($URL->host_port, 'Gerrit Code Review', $username, $password);
+    # Configure UserAgent name and password authentication
+    for my $ua ($rest->getUseragent) {
+        $ua->agent(__PACKAGE__);
+        $ua->credentials($URL->host_port, 'Gerrit Code Review', $username, $password);
+    }
 
     return bless {
         rest => $rest,
