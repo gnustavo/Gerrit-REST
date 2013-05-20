@@ -34,6 +34,9 @@ sub new {
     # Set default base URL
     $rest->setHost($URL);
 
+    # Follow redirects/authentication by default
+    $rest->setFollow(1);
+
     # Request compact JSON by default
     $rest->addHeader('Accept' => 'application/json');
 
