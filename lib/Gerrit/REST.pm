@@ -29,9 +29,10 @@ sub new {
     is_hash_ref($rest_client_config)
         or croak __PACKAGE__ . "::new: REST_CLIENT_CONFIG argument must be a hash-ref.\n";
 
-    $rest_client_config->{host} = $URL;
-
     my $rest = REST::Client->new($rest_client_config);
+
+    # Set default base URL
+    $rest->setHost($URL);
 
     # Request compact JSON by default
     $rest->addHeader('Accept' => 'application/json');
