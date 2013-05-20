@@ -123,6 +123,7 @@ sub POST {
 
 1;
 
+
 =head1 SYNOPSIS
 
     use Gerrit::REST;
@@ -150,7 +151,7 @@ sub POST {
     # Review change-id #100, patch-set 3
     $gerrit->POST("/changes/100/revisions/3/review", {
         message => 'Some nits need to be fixed.',
-        labels  => ['Code-Review' => -1],
+        labels  => {'Code-Review' => -1},
     });
 
 =head1 DESCRIPTION
