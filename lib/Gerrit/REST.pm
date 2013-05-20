@@ -13,16 +13,16 @@ use Data::Util qw/:check/;
 use REST::Client;
 
 sub new {
-    my ($class, $URL, $user, $pass, $rest_client_config) = @_;
+    my ($class, $URL, $username, $password, $rest_client_config) = @_;
 
     $URL = URI->new($URL) if is_string($URL);
     is_instance($URL, 'URI')
         or croak __PACKAGE__ . "::new: URL argument must be a string or a URI object.\n";
 
-    is_string($user)
+    is_string($username)
         or croak __PACKAGE__ . "::new: USERNAME argument must be a string.\n";
 
-    is_string($pass)
+    is_string($password)
         or croak __PACKAGE__ . "::new: PASSWORD argument must be a string.\n";
 
     $rest_client_config = {} unless defined $rest_client_config;
