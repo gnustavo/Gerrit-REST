@@ -7,27 +7,37 @@ package Gerrit::REST;
 # ABSTRACT: A thin wrapper around Gerrit's REST API
 
 use Carp;
+use URI;
 use JSON;
+use Data::Util qw/:check/;
 use REST::Client;
 
 sub new {
-    my ($class, $opts, $rest_client_config) = @_;
+    my ($class, $URL, $user, $pass, $rest_client_config) = @_;
 
-    $opts               //= {};
-    $rest_client_config //= {};
+    $URL = URI->new($URL) if is_string($URL);
+    is_instance($URL, 'URI')
+        or croak __PACKAGE__ . "::new: URL argument must be a string or a URI object.\n";
+
+    is_string($user)
+        or croak __PACKAGE__ . "::new: USERNAME argument must be a string.\n";
+
+    is_string($pass)
+        or croak __PACKAGE__ . "::new: PASSWORD argument must be a string.\n";
+
+    $rest_client_config = {} unless defined $rest_client_config;
+    is_hash_ref($rest_client_config)
+        or croak __PACKAGE__ . "::new: REST_CLIENT_CONFIG argument must be a hash-ref.\n";
+
+    $rest_client_config->{host} = $URL;
 
     my $rest = REST::Client->new($rest_client_config);
 
     # Request compact JSON by default
-    $rest->addHeader('Accept' => 'application/json')
-        if ! exists $opts->{compact_json} || $opts->{compact_json};
+    $rest->addHeader('Accept' => 'application/json');
 
     # Configure password authentication
-    if (my @credentials = grep {defined} @{$opts}{qw/netloc realm username password/}) {
-        @credentials == 4
-            or croak "The arguments 'netloc', 'realm', 'username', and 'password' must be all set.\n";
-        $rest->getUseragent()->credentials(@credentials);
-    }
+    $rest->getUseragent()->credentials($URL->host_port, 'Gerrit Code Review', $username, $password);
 
     return bless {
         rest => $rest,
