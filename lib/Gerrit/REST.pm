@@ -19,6 +19,18 @@ sub new {
     is_instance($URL, 'URI')
         or croak __PACKAGE__ . "::new: URL argument must be a string or a URI object.\n";
 
+    # If no password is set we try to lookup the credentials in the .netrc file
+    if (! defined $password) {
+        eval 'require Net::Netrc';
+        croak "Can't require Net::Netrc module. Please, specify the USERNAME and PASSWORD.\n" if $@;
+        if (my $machine = Net::Netrc->lookup($URL->host, $username)) { # $username may be undef
+            $username = $machine->login;
+            $password = $machine->password;
+        } else {
+            croak "No credentials found in the .netrc file.\n";
+        }
+    }
+
     is_string($username)
         or croak __PACKAGE__ . "::new: USERNAME argument must be a string.\n";
 
@@ -171,22 +183,29 @@ L<Gerrit::Client|http://search.cpan.org/dist/Gerrit-Client/>.
 
 =head2 new URL, USERNAME, PASSWORD [, REST_CLIENT_CONFIG]
 
-The constructor needs three or four arguments:
+The constructor needs up to four arguments:
 
 =over
 
 =item * URL
 
-A string or a URI object denoting the base URL of the Gerrit server.
+A string or a URI object denoting the base URL of the Gerrit
+server. This is a required argument.
 
 =item * USERNAME
 
 The username of a Gerrit user.
 
+It can be undefined if PASSWORD is also undefined. In such a case the
+user credentials are looked up in the C<.netrc> file.
+
 =item * PASSWORD
 
 The HTTP password of the user. (This is the password the user uses to
 log in to Gerrit's web interface.)
+
+It can be undefined, in which case the user credentials are looked up
+in the C<.netrc> file.
 
 =item * REST_CLIENT_CONFIG
 
