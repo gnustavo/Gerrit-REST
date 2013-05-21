@@ -73,8 +73,8 @@ sub _content {
     my $content = $rest->responseContent();
 
     unless ($code =~ /^2/) {
-        require HTTP::Status;
-        my $message = HTTP::Status::status_message($code) || '(unknown)';
+        eval 'require HTTP::Status';
+        my $message = $@ ? '(?)' : HTTP::Status::status_message($code) || '(unknown)';
         croak "ERROR: $code - $message\n$type\n$content\n";
     }
 
