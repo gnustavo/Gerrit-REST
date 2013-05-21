@@ -1,10 +1,10 @@
+package Gerrit::REST;
+# ABSTRACT: A thin wrapper around Gerrit's REST API
+
 use 5.010;
 use utf8;
 use strict;
 use warnings;
-
-package Gerrit::REST;
-# ABSTRACT: A thin wrapper around Gerrit's REST API
 
 use Carp;
 use URI;
@@ -21,8 +21,8 @@ sub new {
 
     # If no password is set we try to lookup the credentials in the .netrc file
     if (! defined $password) {
-        eval 'require Net::Netrc';
-        croak "Can't require Net::Netrc module. Please, specify the USERNAME and PASSWORD.\n" if $@;
+        eval {require Net::Netrc}
+            or croak "Can't require Net::Netrc module. Please, specify the USERNAME and PASSWORD.\n";
         if (my $machine = Net::Netrc->lookup($URL->host, $username)) { # $username may be undef
             $username = $machine->login;
             $password = $machine->password;
@@ -73,13 +73,14 @@ sub _content {
     my $content = $rest->responseContent();
 
     unless ($code =~ /^2/) {
-        eval 'require HTTP::Status';
-        my $message = $@ ? '(?)' : HTTP::Status::status_message($code) || '(unknown)';
+        my $message = eval {require HTTP::Status}
+            ? HTTP::Status::status_message($code) || '(unknown)'
+                : '(?)';
         croak "ERROR: $code - $message\n$type\n$content\n";
     }
 
     if (! defined $type) {
-        return undef;
+        return;
     } elsif ($type =~ m:^application/json:i) {
         if (substr($content, 0, 4) eq ")]}'") {
             return $self->{json}->decode(substr($content, 5));
