@@ -76,7 +76,14 @@ sub _content {
         my $message = eval {require HTTP::Status}
             ? HTTP::Status::status_message($code) || '(unknown)'
                 : '(?)';
-        croak "ERROR: $code - $message\n$type\n$content\n";
+        warn "GERRIT ERROR ($code - $message):\n";
+        if ($type =~ m:text/plain:) {
+            croak $content;
+        } elsif ($type =~ m:text/html:i && eval {require HTML::TreeBuilder}) {
+            croak HTML::TreeBuilder->new_from_content($content)->as_text;
+        } else {
+            croak "[Content-Type: $type] $content\n";
+        }
     }
 
     if (! defined $type) {
