@@ -80,7 +80,7 @@ sub _content {
         if ($type =~ m:text/plain:) {
             croak $content;
         } elsif ($type =~ m:text/html:i && eval {require HTML::TreeBuilder}) {
-            croak HTML::TreeBuilder->new_from_content($content)->as_text;
+            croak(HTML::TreeBuilder->new_from_content($content)->as_text);
         } else {
             croak "[Content-Type: $type] $content\n";
         }
