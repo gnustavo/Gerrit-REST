@@ -2,6 +2,11 @@ Revision history for perl module Gerrit-REST. -*- text -*-
 
 {{$NEXT}}
 
+0.006     2013-10-12 00:03:58 America/Sao_Paulo
+
+  [Changes]
+  - Standardize the error messages.
+
 0.005     2013-10-04 11:28:40 America/Sao_Paulo
 
   [Fixes]
