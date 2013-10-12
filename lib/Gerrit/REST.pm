@@ -72,19 +72,13 @@ sub _content {
     my $type    = $rest->responseHeader('Content-Type');
     my $content = $rest->responseContent();
 
-    unless ($code =~ /^2/) {
-        my $message = eval {require HTTP::Status}
-            ? HTTP::Status::status_message($code) || '(unknown)'
-                : '(?)';
-        warn "GERRIT ERROR ($code - $message):\n";
-        if ($type =~ m:text/plain:) {
-            croak $content;
-        } elsif ($type =~ m:text/html:i && eval {require HTML::TreeBuilder}) {
-            croak(HTML::TreeBuilder->new_from_content($content)->as_text);
-        } else {
-            croak "[Content-Type: $type] $content\n";
-        }
-    }
+    $code =~ /^2/
+        or croak <<EOF;
+Code: $code
+Content-Type: $type
+
+$content
+EOF
 
     if (! defined $type) {
         return;
@@ -268,8 +262,9 @@ In case of errors (i.e., if the underlying HTTP method return an error
 code different from 2xx) the methods croak with a multi-line string
 like this:
 
-    ERROR: <CODE> - <MESSAGE>
-    <CONTENT-TYPE>
+    Code: <CODE>
+    Content-Type: <CONTENT-TYPE>
+
     <CONTENT>
 
 So, in order to treat errors you must invoke the methods in an eval
