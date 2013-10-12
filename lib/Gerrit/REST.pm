@@ -73,7 +73,7 @@ sub _content {
     my $content = $rest->responseContent();
 
     $code =~ /^2/
-        or croak <<EOF;
+        or die <<EOF;
 Code: $code
 Content-Type: $type
 
