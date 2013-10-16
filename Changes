@@ -2,7 +2,16 @@ Revision history for perl module Gerrit-REST. -*- text -*-
 
 {{$NEXT}}
 
+0.009     2013-10-16 10:49:33 America/Sao_Paulo
+
+  [Fixes]
+  - Convert REST::Client exceptions into Gerrit::REST::Exception
+    objects.
+
 0.008     2013-10-12 21:53:29 America/Sao_Paulo
+
+  [Changes]
+  - Throw Gerrit::REST::Exception objects instead of strings.
 
 0.007     2013-10-12 00:19:53 America/Sao_Paulo
 
