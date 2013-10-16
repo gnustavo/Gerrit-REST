@@ -16,14 +16,14 @@ sub new {
 }
 
 sub as_text {
-    my ($op) = @_;
-    my $string = "Gerrit::REST::Exception[$op->{code}]: ";
-    if ($op->{type} =~ m:text/plain:i) {
-        $string .= $op->{content};
-    } elsif ($op->{type} =~ m:text/html:i && eval {require HTML::TreeBuilder}) {
-        $string .= HTML::TreeBuilder->new_from_content($op->{content})->as_text;
+    my ($self) = @_;
+    my $string = "Gerrit::REST::Exception[$self->{code}]: ";
+    if ($self->{type} =~ m:text/plain:i) {
+        $string .= $self->{content};
+    } elsif ($self->{type} =~ m:text/html:i && eval {require HTML::TreeBuilder}) {
+        $string .= HTML::TreeBuilder->new_from_content($self->{content})->as_text;
     } else {
-        $string .= "<unconvertable Content-Type '$op->{type}'>";
+        $string .= "<unconvertable Content-Type '$self->{type}'>";
     };
     $string =~ s/\n*$/\n/s;       # force ending in a single newline
     return $string;
