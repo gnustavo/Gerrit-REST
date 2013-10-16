@@ -104,7 +104,8 @@ sub _content {
 sub GET {
     my ($self, $resource) = @_;
 
-    $self->{rest}->GET("/a$resource");
+    eval { $self->{rest}->GET("/a$resource") };
+    die Gerrit::REST::Exception->new($@) if $@;
 
     return $self->_content();
 }
@@ -112,7 +113,8 @@ sub GET {
 sub DELETE {
     my ($self, $resource) = @_;
 
-    $self->{rest}->DELETE("/a$resource");
+    eval { $self->{rest}->DELETE("/a$resource") };
+    die Gerrit::REST::Exception->new($@) if $@;
 
     return $self->_content();
 }
@@ -120,11 +122,12 @@ sub DELETE {
 sub PUT {
     my ($self, $resource, $value) = @_;
 
-    $self->{rest}->PUT(
+    eval { $self->{rest}->PUT(
         "/a$resource",
         $self->{json}->encode($value),
         {'Content-Type' => 'application/json;charset=UTF-8'},
-    );
+    ) };
+    die Gerrit::REST::Exception->new($@) if $@;
 
     return $self->_content();
 }
@@ -132,11 +135,12 @@ sub PUT {
 sub POST {
     my ($self, $resource, $value) = @_;
 
-    $self->{rest}->POST(
+    eval { $self->{rest}->POST(
         "/a$resource",
         $self->{json}->encode($value),
         {'Content-Type' => 'application/json;charset=UTF-8'},
-    );
+    ) };
+    die Gerrit::REST::Exception->new($@) if $@;
 
     return $self->_content();
 }
