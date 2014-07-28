@@ -1,5 +1,5 @@
 package Gerrit::REST;
-# ABSTRACT: A thin wrapper around Gerrit's REST API
+# ABSTRACT: Thin wrapper around Gerrit's REST API
 
 use 5.010;
 use utf8;

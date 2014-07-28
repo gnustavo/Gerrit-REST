@@ -1,6 +1,6 @@
 =pod
 
-Gerrit::REST - A thin wrapper around Gerrit's REST API
+Gerrit::REST - Thin wrapper around Gerrit's REST API
 
 CAUTION - THIS IS STILL ALPHA CODE
 
