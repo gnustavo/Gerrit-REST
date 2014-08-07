@@ -11,7 +11,6 @@ use URI;
 use JSON;
 use Data::Util qw/:check/;
 use REST::Client;
-use Gerrit::REST::Exception;
 
 sub new {
     my ($class, $URL, $username, $password, $rest_client_config) = @_;
@@ -65,6 +64,33 @@ sub new {
     } => $class;
 }
 
+sub _error {
+    my ($self, $content, $type, $code) = @_;
+
+    $type = 'text/plain' unless $type;
+    $code = 500          unless $code;
+
+    my $msg = __PACKAGE__ . " Error[$code";
+
+    if (eval {require HTTP::Status}) {
+        if (my $status = HTTP::Status::status_message($code)) {
+            $msg .= " - $status";
+        }
+    }
+
+    $msg .= "]:\n";
+
+    if ($type =~ m:text/plain:i) {
+        $msg .= $content;
+    } elsif ($type =~ m:text/html:i && eval {require HTML::TreeBuilder}) {
+        $msg .= HTML::TreeBuilder->new_from_content($content)->as_text;
+    } else {
+        $msg .= "<unconvertable Content-Type: '$type'>";
+    };
+    $msg =~ s/\n*$//s;       # strip trailing newlines
+    return $msg;
+}
+
 sub _content {
     my ($self) = @_;
 
@@ -76,7 +102,7 @@ sub _content {
     ## no critic (ErrorHandling::RequireCarping)
 
     $code =~ /^2/
-        or die Gerrit::REST::Exception->new($code, $type, $content);
+        or croak $self->_error($content, $type, $code);
 
     if (! defined $type) {
         return;
@@ -84,18 +110,12 @@ sub _content {
         if (substr($content, 0, 4) eq ")]}'") {
             return $self->{json}->decode(substr($content, 5));
         } else {
-            die Gerrit::REST::Exception->new(
-                '500', 'text/plain',
-                "Missing \")]}'\" prefix for JSON content:\n$content\n",
-            );
+            croak $self->_error("Missing \")]}'\" prefix for JSON content:\n$content");
         }
     } elsif ($type =~ m:^text/plain:i) {
         return $content;
     } else {
-        die Gerrit::REST::Exception->new(
-            '500', 'text/plain',
-            "I don't understand content with Content-Type '$type'.\n",
-        );
+        croak $self->_error("I don't understand content with Content-Type '$type'");
     }
 
     ## use critic
@@ -105,7 +125,7 @@ sub GET {
     my ($self, $resource) = @_;
 
     eval { $self->{rest}->GET("/a$resource") };
-    die Gerrit::REST::Exception->new($@) if $@;
+    croak $self->_error($@) if $@;
 
     return $self->_content();
 }
@@ -114,7 +134,7 @@ sub DELETE {
     my ($self, $resource) = @_;
 
     eval { $self->{rest}->DELETE("/a$resource") };
-    die Gerrit::REST::Exception->new($@) if $@;
+    croak $self->_error($@) if $@;
 
     return $self->_content();
 }
@@ -127,7 +147,7 @@ sub PUT {
         $self->{json}->encode($value),
         {'Content-Type' => 'application/json;charset=UTF-8'},
     ) };
-    die Gerrit::REST::Exception->new($@) if $@;
+    croak $self->_error($@) if $@;
 
     return $self->_content();
 }
@@ -140,7 +160,7 @@ sub POST {
         $self->{json}->encode($value),
         {'Content-Type' => 'application/json;charset=UTF-8'},
     ) };
-    die Gerrit::REST::Exception->new($@) if $@;
+    croak $self->_error($@) if $@;
 
     return $self->_content();
 }
@@ -179,17 +199,6 @@ __END__
         message => 'Some nits need to be fixed.',
         labels  => {'Code-Review' => -1},
     });
-
-    # How to deal with errors easily
-    my $project = eval { $gerrit->GET('/projects/myproject') };
-    die $@->as_text if $@;
-
-    # How to deal with errors thoroughly
-    my $project = eval { $gerrit->GET('/projects/myproject') };
-    if ($@) {
-        my ($code, $type, $content) = @{$@}{qw/code type content/};
-        # ...
-    }
 
 =head1 DESCRIPTION
 
@@ -279,14 +288,8 @@ Some endpoints don't return anything. In those cases, the methods
 return C<undef>. The methods croak if they get any other type of
 values in return.
 
-In case of errors (i.e., if the underlying HTTP method return an error
-code different from 2xx) the method dies throwing a
-C<Gerrit::REST::Exception> object. These objects are simple hash-refs
-containing the C<code>, the C<type>, and the C<content> of the HTTP
-error response. So, in order to treat errors you must invoke the
-methods in an eval block and test C<$@> or use any of the exception
-handling Perl modules, such as C<Try::Tiny> and C<Try::Catch>. The
-L</SYNOPSIS> section above shows some examples.
+In case of errors (i.e., if the underlying HTTP method return an error code
+different from 2xx) the methods croak with a string error message.
 
 =head2 GET RESOURCE
 
