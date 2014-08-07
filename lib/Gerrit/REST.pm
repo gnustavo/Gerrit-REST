@@ -261,10 +261,9 @@ Gerrit's REST endpoints.
 All four methods need a RESOURCE argument which is simply a string
 denoting the endpoint URL's path, as indicated in the documentation.
 
-PUT and POST need a second argument which is the VALUE that's a Perl
-data structure (usually a hash-ref, but sometimes a simple string)
-which is encoded using the C<encode> method of a C<JSON> object and
-passed as contents of the underlying associated HTTP method.
+PUT and POST second argument (usually a hash-ref, but sometimes a simple
+string) is encoded using the C<encode> method of a C<JSON> object and passed
+as contents of the underlying associated HTTP method.
 
 All four methods return the value returned by the associated
 endpoint's method, as specified in the documentation, decoded
