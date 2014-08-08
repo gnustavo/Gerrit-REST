@@ -99,8 +99,6 @@ sub _content {
     my $type    = $rest->responseHeader('Content-Type');
     my $content = $rest->responseContent();
 
-    ## no critic (ErrorHandling::RequireCarping)
-
     $code =~ /^2/
         or croak $self->_error($content, $type, $code);
 
@@ -117,15 +115,13 @@ sub _content {
     } else {
         croak $self->_error("I don't understand content with Content-Type '$type'");
     }
-
-    ## use critic
 }
 
 sub GET {
     my ($self, $resource) = @_;
 
-    eval { $self->{rest}->GET("/a$resource") };
-    croak $self->_error($@) if $@;
+    eval { $self->{rest}->GET("/a$resource") }
+        or croak $self->_error($@);
 
     return $self->_content();
 }
@@ -133,8 +129,8 @@ sub GET {
 sub DELETE {
     my ($self, $resource) = @_;
 
-    eval { $self->{rest}->DELETE("/a$resource") };
-    croak $self->_error($@) if $@;
+    eval { $self->{rest}->DELETE("/a$resource") }
+        or croak $self->_error($@);
 
     return $self->_content();
 }
@@ -146,8 +142,8 @@ sub PUT {
         "/a$resource",
         $self->{json}->encode($value),
         {'Content-Type' => 'application/json;charset=UTF-8'},
-    ) };
-    croak $self->_error($@) if $@;
+    ) }
+        or croak $self->_error($@);
 
     return $self->_content();
 }
@@ -159,8 +155,8 @@ sub POST {
         "/a$resource",
         $self->{json}->encode($value),
         {'Content-Type' => 'application/json;charset=UTF-8'},
-    ) };
-    croak $self->_error($@) if $@;
+    ) }
+        or croak $self->_error($@);
 
     return $self->_content();
 }
