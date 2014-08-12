@@ -108,7 +108,7 @@ sub _content {
         if (substr($content, 0, 4) eq ")]}'") {
             return $self->{json}->decode(substr($content, 5));
         } else {
-            croak $self->_error("Missing \")]}'\" prefix for JSON content:\n$content");
+            croak $self->_error("Missing \")]}'\" prefix for JSON content:\n\n$content");
         }
     } elsif ($type =~ m:^text/plain:i) {
         return $content;
@@ -121,7 +121,7 @@ sub GET {
     my ($self, $resource) = @_;
 
     eval { $self->{rest}->GET("/a$resource") }
-        or croak $self->_error($@);
+        or croak $self->_error("Error in GET(/a$resource): $@");
 
     return $self->_content();
 }
@@ -130,7 +130,7 @@ sub DELETE {
     my ($self, $resource) = @_;
 
     eval { $self->{rest}->DELETE("/a$resource") }
-        or croak $self->_error($@);
+        or croak $self->_error("Error in DELETE(/a$resource): $@");
 
     return $self->_content();
 }
@@ -143,7 +143,7 @@ sub PUT {
         $self->{json}->encode($value),
         {'Content-Type' => 'application/json;charset=UTF-8'},
     ) }
-        or croak $self->_error($@);
+        or croak $self->_error("Error in PUT(/a$resource, ...): $@");
 
     return $self->_content();
 }
@@ -156,7 +156,7 @@ sub POST {
         $self->{json}->encode($value),
         {'Content-Type' => 'application/json;charset=UTF-8'},
     ) }
-        or croak $self->_error($@);
+        or croak $self->_error("Error in POST(/a$resource, ...): $@");
 
     return $self->_content();
 }
