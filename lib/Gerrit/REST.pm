@@ -316,3 +316,7 @@ Gerrit::Client is another Perl module implementing the other Gerrit
 API based on SSH.
 
 =back
+
+=head1 REPOSITORY
+
+L<https://github.com/gnustavo/Gerrit-REST>
